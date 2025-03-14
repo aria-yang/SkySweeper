@@ -8,32 +8,32 @@ from adafruit_motor import servo
 led = digitalio . DigitalInOut (board.LED)
 led. direction = digitalio.Direction.OUTPUT
 button = digitalio . DigitalInOut (board.GP16)
-button . direction = digitalio . Direction .INPUT
+button . direction = digitalio.Direction.INPUT
 button .pull = digitalio .Pull.UP
 
 # Configure GPIO for the sensor input to/ output from the Pico
 trigger = digitalio . DigitalInOut (board.GP2)
-trigger . direction = digitalio . Direction . OUTPUT
+trigger . direction = digitalio.Direction.OUTPUT
 echo = digitalio . DigitalInOut (board.GP3)
 echo. direction = digitalio . Direction .INPUT
 echo.pull = digitalio .Pull.UP
 
 # create a PWMOut object on Pin A2.
-pwm = pwmio. PWMOut(board.GP14 , duty_cycle =2 ∗∗ 15, frequency =50)
-# Create a servo object , my servo .
+pwm = pwmio.PWMOut(board.GP14 , duty_cycle =2 ∗∗ 15, frequency =50)
+# Create a servo object, my servo.
 my_servo = servo.Servo(pwm)
-print ("Servo shaft is turning now.")
+print("Servo shaft is turning now.")
 
 # Set up loop variable and start plotter
 prev_button_value = button.value
 print ((1 ,))
 
 def raise_arm():
-    for angle in range (0, 180, 5): # 0 − 180 degrees , 5 degrees at a time.
+    for angle in range (0, 180, 5): # 0 − 180 degrees, 5 degrees at a time.
         my_servo.angle = angle
         time. sleep (0.05)
 def lower_arm():
-    for angle in range (180 , 0, -5): # 180 - 0 degrees , 5 degrees at a time.
+    for angle in range (180 , 0, -5): # 180 - 0 degrees, 5 degrees at a time.
         my_servo.angle = angle
         time. sleep (0.05)
 
@@ -65,7 +65,7 @@ def capture_echo(timeout):
             data.append ((1 ,))
     return data
 
-def plot data (data):
+def plot_data (data):
     # plot points with pauses in between to avoid overloading
     for point in data:
         print (point)
@@ -76,12 +76,12 @@ while True:
     led.value = not button.value
     
     # check if trigger button has been pressed
-    button_pressed, prev_button_value = trigger on button pressed (prev_button_value)
+    button_pressed, prev_button_value = trigger_on_button_pressed (prev_button_value)
     # if trigger , capture and plot a bunch of points
     if(button_pressed):
-        points = capture echo (1000)
+        points = capture_echo(1000)
         if(len(points) > 0):
-            plot data ( points )
+            plot_data (points)
 
     # print a low value and wait a second to avoid overloading
     print ((0.001 ,))

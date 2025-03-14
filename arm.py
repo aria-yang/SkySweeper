@@ -20,18 +20,18 @@ import adafruit hcsr04
 #         time.sleep(2)
 
 # Configure GPIO for the LED and button
-led = digitalio . DigitalInOut (board.LED)
+led = digitalio.DigitalInOut (board.LED)
 led. direction = digitalio.Direction.OUTPUT
-button = digitalio . DigitalInOut (board.GP16)
-button . direction = digitalio.Direction.INPUT
-button .pull = digitalio .Pull.UP
+button = digitalio.DigitalInOut (board.GP16)
+button. direction = digitalio.Direction.INPUT
+button.pull = digitalio.Pull.UP
 
 # Configure GPIO for the sensor input to/ output from the Pico
-trigger = digitalio . DigitalInOut (board.GP2)
+trigger = digitalio.DigitalInOut (board.GP2)
 trigger . direction = digitalio.Direction.OUTPUT
-echo = digitalio . DigitalInOut (board.GP3)
+echo = digitalio.DigitalInOut (board.GP3)
 echo. direction = digitalio . Direction .INPUT
-echo.pull = digitalio .Pull.UP
+echo.pull = digitalio.Pull.UP
 
 # create a PWMOut object on Pin A2.
 pwm = pwmio.PWMOut(board.GP14, duty_cycle=2**15, frequency=50)
@@ -41,7 +41,7 @@ print("Servo shaft is turning now.")
 
 # Set up loop variable and start plotter
 prev_button_value = button.value
-print ((1 ,))
+print((1 ,))
 
 def raise_arm():
     for angle in range (0, 180, 5): # 0 − 180 degrees, 5 degrees at a time.
@@ -50,7 +50,7 @@ def raise_arm():
 def lower_arm():
     for angle in range (180 , 0, -5): # 180 - 0 degrees, 5 degrees at a time.
         my_servo.angle = angle
-        time. sleep (0.05)
+        time.sleep (0.05)
 
 def trigger_on_button_pressed(prev_button_value):
     # set default button state to "not pressed "
@@ -60,7 +60,7 @@ def trigger_on_button_pressed(prev_button_value):
         # push the trigger and update button state
         trigger .value = True
         button_pressed = True
-        print ('trigger')
+        print('trigger')
         # reset trigger
         trigger .value = False
         return button_pressed, button.value
@@ -80,10 +80,10 @@ def capture_echo(timeout):
             data.append ((1 ,))
     return data
 
-def plot_data (data):
+def plot_data(data):
     # plot points with pauses in between to avoid overloading
     for point in data:
-        print (point)
+        print(point)
         time.sleep (0.01)
 
 while True:

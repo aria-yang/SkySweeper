@@ -28,15 +28,16 @@ print ("Servo shaft is turning now.")
 prev_button_value = button.value
 print ((1 ,))
 
-while True:
+def raise_arm():
     for angle in range (0, 180, 5): # 0 − 180 degrees , 5 degrees at a time.
         my_servo.angle = angle
         time. sleep (0.05)
+def lower_arm():
     for angle in range (180 , 0, -5): # 180 - 0 degrees , 5 degrees at a time.
         my_servo.angle = angle
         time. sleep (0.05)
 
-def trigger_on_button_pressed (prev_button_value):
+def trigger_on_button_pressed(prev_button_value):
     # set default button state to "not pressed "
     button_pressed = False
     # if button is pressed (and not just bouncing )
@@ -57,7 +58,7 @@ def capture_echo(timeout):
         i+=1
     # if timeout reached , no data collection
     if i == timeout :
-        print('timeout!’)
+        print('timeout!')
     # if timeout not reached , then keep collecting data
     else:
         while (echo.value):

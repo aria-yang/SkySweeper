@@ -3,6 +3,21 @@ import digitalio
 import time
 import pwmio
 from adafruit_motor import servo
+import adafruit hcsr04
+
+# Set up the ultrasonic sensor using a library
+sonar = adafruit hcsr04.HCSR04 (trigger_pin =board.GP2 , echo_pin =board.GP3)
+# Take readings and output calibrated values
+while True:
+    try:
+        # Take a reading (no button needed ) of the range
+        X = sonar.distance
+        # Use calibration data to adjust this value
+        real_dist = 1.084 * (X−9.044)+10
+        print (( real dist,))
+    except RuntimeError:
+        print ("Retrying!")
+        time.sleep(2)
 
 # Configure GPIO for the LED and button
 led = digitalio . DigitalInOut (board.LED)
@@ -71,18 +86,22 @@ def plot_data (data):
         print (point)
         time.sleep (0.01)
 
-while True:
-    # if the button is pressed turn LED on (else turn LED off)
-    led.value = not button.value
+# while True:
+#     # if the button is pressed turn LED on (else turn LED off)
+#     led.value = not button.value
     
-    # check if trigger button has been pressed
-    button_pressed, prev_button_value = trigger_on_button_pressed (prev_button_value)
-    # if trigger , capture and plot a bunch of points
-    if(button_pressed):
-        points = capture_echo(1000)
-        if(len(points) > 0):
-            plot_data (points)
+#     # check if trigger button has been pressed
+#     button_pressed, prev_button_value = trigger_on_button_pressed (prev_button_value)
+#     # if trigger , capture and plot a bunch of points
+#     if(button_pressed):
+#         points = capture_echo(1000)
+#         if(len(points) > 0):
+#             plot_data (points)
 
-    # print a low value and wait a second to avoid overloading
-    print ((0.001 ,))
-    time. sleep (1.0)
+#     # print a low value and wait a second to avoid overloading
+#     print ((0.001 ,))
+#     time. sleep (1.0)
+
+
+
+

@@ -19,8 +19,8 @@ echo. direction = digitalio . Direction .INPUT
 echo.pull = digitalio .Pull.UP
 
 # create a PWMOut object on Pin A2.
-pwm = pwmio.PWMOut(board.GP14 , duty_cycle =2 ∗∗ 15, frequency =50)
-# Create a servo object, my servo.
+pwm = pwmio.PWMOut(board.GP14, duty_cycle=2**15, frequency=50)
+# Create a servo object, my_servo.
 my_servo = servo.Servo(pwm)
 print("Servo shaft is turning now.")
 

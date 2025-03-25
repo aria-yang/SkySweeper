@@ -3,6 +3,9 @@ import board
 import adafruit_hcsr04
 import array
 import RPi.GPIO as GPIO
+import pwmio
+import digitalio
+from adafruit_motor import servo
 
 # Configuration for ultrasonic sensor
 TRIGGER_PIN = board.GP2
@@ -32,6 +35,30 @@ for name, pin in pins.items():
     GPIO.setup(pin, GPIO.OUT)
     pwm[name] = GPIO.PWM(pin, 100)  # 100Hz PWM
     pwm[name].start(0)              # Start with 0% duty cycle
+
+# create a PWMOut object on Pin A2 for servomotor
+pwm = pwmio.PWMOut(board.GP14, duty_cycle=2 ** 15, frequency=50)
+# Create a servo object, my_servo.
+my_servo = servo.Servo(pwm)
+
+# # set up direction pins as digital outputs for DC motors
+# in1 = digitalio.DigitalInOut(board.GP14)
+# in2 = digitalio.DigitalInOut(board.GP15)
+# in1.direction = digitalio.Direction.OUTPUT
+# in2.direction = digitalio.Direction.OUTPUT
+
+# # set up motor driving signal as PWM output for DC motor
+# ena = pwmio.PWMOut(board.GP16, duty_cycle = 0)
+
+# # set time limits for DC motors
+# start_time = time.time()
+# time_limit = 20
+
+# # set starting (fastest) motor duty cycles for DC motors
+# CW_duty = 50000
+# CCW_duty = 50000
+# duty_step = 5000
+# max_int = 65535
 
 # Initialize sensor
 sonar = adafruit_hcsr04.HCSR04(trigger_pin=TRIGGER_PIN, echo_pin=ECHO_PIN, timeout=TIMEOUT)
@@ -72,7 +99,15 @@ def get_averaged_distance():
         return sum(distance_buffer) / samples_collected
     else:
         raise RuntimeError("Could not get valid readings")
-# Function to stop all motors
+
+def move_arm_by_angle(angle):
+    """Move the servo motor to a specific angle."""
+    # Ensure the angle is within the servo's range (0 to 180 degrees)
+    angle = max(0, min(180, angle))
+    my_servo.angle = angle
+    time.sleep(0.05)
+
+# Function to stop all DC motors
 def stop():
     for name in pwm:
         pwm[name].ChangeDutyCycle(0)

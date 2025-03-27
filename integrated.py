@@ -2,22 +2,17 @@ import time
 import board
 import adafruit_hcsr04
 import array
-import RPi.GPIO as GPIO
 import pwmio
 import digitalio
 from adafruit_motor import servo
 
 # Configuration for ultrasonic sensor
-TRIGGER_PIN = board.GP2
-ECHO_PIN = board.GP3
+TRIGGER_PIN = board.GP18
+ECHO_PIN = board.GP19
 SAMPLE_INTERVAL = 0.5  # Faster sampling for better responsiveness
 NUM_SAMPLES = 3        # Number of samples to average (reduces noise)
 MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
-
-# Set GPIO mode to BCM numbering
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)  # Disable GPIO warnings
 
 # Define GPIO pins for motor control
 pins = {
@@ -100,12 +95,14 @@ def get_averaged_distance():
     else:
         raise RuntimeError("Could not get valid readings")
 
-def move_arm_by_angle(angle):
-    """Move the servo motor to a specific angle."""
-    # Ensure the angle is within the servo's range (0 to 180 degrees)
-    angle = max(0, min(180, angle))
-    my_servo.angle = angle
-    time.sleep(0.05)
+def raise_arm():
+    for angle in range (0, 120, 5): # 0 − 180 degrees, 5 degrees at a time.
+        my_servo.angle = angle
+        time. sleep (0.05)
+def lower_arm():
+    for angle in range (120 , 0, -5): # 180 - 0 degrees, 5 degrees at a time.
+        my_servo.angle = angle
+        time.sleep (0.05)
 
 # Function to stop all DC motors
 def stop():

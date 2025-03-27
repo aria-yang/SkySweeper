@@ -1,15 +1,10 @@
-'''
-Improved Ultrasonic Sensor Distance Detection
-Features:
-- Enhanced small distance detection
-- Improved error handling
-- Optional averaging for stability
-- Maintained calibration formula
-'''
 import time
 import board
 import adafruit_hcsr04
 import array
+import digitalio
+import pwmio
+import digitalio
 
 # Configuration
 TRIGGER_PIN = board.GP18
@@ -18,6 +13,25 @@ SAMPLE_INTERVAL = 0.5  # Faster sampling for better responsiveness
 NUM_SAMPLES = 3        # Number of samples to average (reduces noise)
 MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
+
+# set up direction pins as digital outputs for DC motor 1
+in1 = digitalio.DigitalInOut(board.GP14)
+in2 = digitalio.DigitalInOut(board.GP15)
+in1.direction = digitalio.Direction.OUTPUT
+in2.direction = digitalio.Direction.OUTPUT
+
+# set up motor driving signal as PWM output for DC motor 1
+ena = pwmio.PWMOut(board.GP16, duty_cycle = 0)
+
+# set time limits
+start_time = time.time()
+time_limit = 20
+
+# set starting (fastest) motor duty cycles
+CW_duty = 50000
+CCW_duty = 50000
+duty_step = 5000
+max_int = 65535
 
 # Initialize sensor
 sonar = adafruit_hcsr04.HCSR04(trigger_pin=TRIGGER_PIN, echo_pin=ECHO_PIN, timeout=TIMEOUT)
@@ -78,3 +92,19 @@ while True:
         break
 
     time.sleep(SAMPLE_INTERVAL)
+
+    # rotate motor shaft in alternating directions with decreasing speed
+    while (time.time() - start_time) < time_limit:
+        # rotate clockwise
+        in1.value, in2.value = (False, True)
+        ena.duty_cycle = CW_duty
+        print("Rotating CW at %f duty cycle"%(100*CW_duty/max_int))
+        CW_duty = CW_duty - duty_step
+        time.sleep(2)
+
+        # rotate counterclockwise
+        in1.value, in2.value = (True, False)
+        ena.duty_cycle = CCW_duty
+        print("Rotating CCW at %f duty cycle"%(100*CCW_duty/max_int))
+        CCW_duty = CCW_duty - duty_step
+        time.sleep(2)

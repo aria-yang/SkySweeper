@@ -26,9 +26,17 @@ in4 = digitalio.DigitalInOut(board.GP13)
 in3.direction = digitalio.Direction.OUTPUT
 in4.direction = digitalio.Direction.OUTPUT
 
+# set up direction pins as digital outputs for DC motor 3
+in5 = digitalio.DigitalInOut(board.GP0)
+in6 = digitalio.DigitalInOut(board.GP1)
+in5.direction = digitalio.Direction.OUTPUT
+in6.direction = digitalio.Direction.OUTPUT
+
 # set up motor driving signal as PWM output for DC motor 1
 ena = pwmio.PWMOut(board.GP16, duty_cycle = 0)
 enb = pwmio.PWMOut(board.GP17, duty_cycle = 0)
+ena2 = pwmio.PWMOut(board.GP2, duty_cycle = 0)
+# enb2 = pwmio.PWMOut(board.GP21, duty_cycle = 0)
 
 # set time limits
 start_time = time.time()
@@ -129,5 +137,20 @@ while True:
         in3.value, in4.value = (True, False)
         enb.duty_cycle = CCW_duty
         print("Rotating 2 CCW at %f duty cycle"%(100*CCW_duty/max_int))
+        CCW_duty = CCW_duty - duty_step
+        time.sleep(2)
+
+        # rotate motor 3
+        # rotate clockwise
+        in5.value, in6.value = (False, True)
+        ena2.duty_cycle = CW_duty
+        print("Rotating 3 CW at %f duty cycle"%(100*CW_duty/max_int))
+        CW_duty = CW_duty - duty_step
+        time.sleep(2)
+
+        # rotate counterclockwise
+        in5.value, in6.value = (True, False)
+        ena2.duty_cycle = CCW_duty
+        print("Rotating 3 CCW at %f duty cycle"%(100*CCW_duty/max_int))
         CCW_duty = CCW_duty - duty_step
         time.sleep(2)

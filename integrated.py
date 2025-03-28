@@ -15,7 +15,7 @@ MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
 
 # set up button as digital input with pull-up resistor
-button = digitalio.DigitalInOut(board.GP5)
+button = digitalio.DigitalInOut(board.GP20)
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP
 
@@ -99,78 +99,105 @@ def get_averaged_distance():
     else:
         raise RuntimeError("Could not get valid readings")
 
+# Add a state variable to track the button press
+button_pressed = False
+last_button_state = button.value  # Store the initial button state
+
 # Main loop
 while True:
-    try:
-        # Get distance reading with improved small distance detection
-        raw_distance = get_averaged_distance()
+    # Check for button press
+    current_button_state = button.value
+    if not current_button_state and last_button_state:  # Detect button press (falling edge)
+        button_pressed = not button_pressed  # Toggle the state
+        print(f"Button pressed. Running: {button_pressed}")
+        time.sleep(0.2)  # Debounce delay
 
-        # Apply calibration
-        calibrated_distance = calibrate_distance(raw_distance)
+    last_button_state = current_button_state  # Update the last button state
 
-        # Print the result
-        print(f"Distance: {calibrated_distance:.1f} cm")
+    if button_pressed:
+        try:
+            # Get distance reading with improved small distance detection
+            raw_distance = get_averaged_distance()
 
-    except RuntimeError as e:
-        print(f"Error: {e}")
-    except KeyboardInterrupt:
-        print("Program stopped by user")
-        break
+            # Apply calibration
+            calibrated_distance = calibrate_distance(raw_distance)
 
-    time.sleep(SAMPLE_INTERVAL)
+            # Print the result
+            print(f"Distance: {calibrated_distance:.1f} cm")
 
-    # rotate motor shaft in alternating directions with decreasing speed
-    while (time.time() - start_time) < time_limit:
-        # rotate motor 1
-        # rotate clockwise
-        in1.value, in2.value = (False, True)
-        ena.duty_cycle = CW_duty
-        print("Rotating 1 CW at %f duty cycle"%(100*CW_duty/max_int))
-        CW_duty = CW_duty - duty_step
-        time.sleep(2)
+        except RuntimeError as e:
+            print(f"Error: {e}")
+        except KeyboardInterrupt:
+            print("Program stopped by user")
+            break
 
-        # rotate counterclockwise
-        in1.value, in2.value = (True, False)
-        ena.duty_cycle = CCW_duty
-        print("Rotating 1 CCW at %f duty cycle"%(100*CCW_duty/max_int))
-        CCW_duty = CCW_duty - duty_step
-        time.sleep(2)
+        time.sleep(SAMPLE_INTERVAL)
 
-        # rotate motor 2
-        # rotate clockwise
-        in3.value, in4.value = (False, True)
-        enb.duty_cycle = CW_duty
-        print("Rotating 2 CW at %f duty cycle"%(100*CW_duty/max_int))
-        CW_duty = CW_duty - duty_step
-        time.sleep(2)
+        # rotate motor shaft in alternating directions with decreasing speed
+        while (time.time() - start_time) < time_limit:
+            # Check for button press during motor operation
+            current_button_state = button.value
+            if not current_button_state and last_button_state:  # Detect button press (falling edge)
+                button_pressed = not button_pressed  # Toggle the state
+                print(f"Button pressed. Running: {button_pressed}")
+                time.sleep(0.2)  # Debounce delay
 
-        # rotate counterclockwise
-        in3.value, in4.value = (True, False)
-        enb.duty_cycle = CCW_duty
-        print("Rotating 2 CCW at %f duty cycle"%(100*CCW_duty/max_int))
-        CCW_duty = CCW_duty - duty_step
-        time.sleep(2)
+            last_button_state = current_button_state  # Update the last button state
 
-        # rotate motor 3
-        # rotate clockwise
-        in5.value, in6.value = (False, True)
-        ena2.duty_cycle = CW_duty
-        print("Rotating 3 CW at %f duty cycle"%(100*CW_duty/max_int))
-        CW_duty = CW_duty - duty_step
-        time.sleep(2)
+            if not button_pressed:
+                print("Button toggled. Stopping motors.")
+                break
 
-        # rotate counterclockwise
-        in5.value, in6.value = (True, False)
-        ena2.duty_cycle = CCW_duty
-        print("Rotating 3 CCW at %f duty cycle"%(100*CCW_duty/max_int))
-        CCW_duty = CCW_duty - duty_step
-        time.sleep(2)
+            # rotate motor 1
+            # rotate clockwise
+            in1.value, in2.value = (False, True)
+            ena.duty_cycle = CW_duty
+            print("Rotating 1 CW at %f duty cycle" % (100 * CW_duty / max_int))
+            CW_duty = CW_duty - duty_step
+            time.sleep(2)
 
-        # servo test
-        print("Servo shaft is turning now.")
-        for angle in range(0, 60, 5):  # 0 - 180 degrees, 5 degrees at a time.
-            my_servo.angle = angle
-            time.sleep(0.05)
-        for angle in range(60, 0, -5): # 180 - 0 degrees, 5 degrees at a time.
-            my_servo.angle = angle
-            time.sleep(0.05)
+            # rotate counterclockwise
+            in1.value, in2.value = (True, False)
+            ena.duty_cycle = CCW_duty
+            print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+            CCW_duty = CCW_duty - duty_step
+            time.sleep(2)
+
+            # rotate motor 2
+            # rotate clockwise
+            in3.value, in4.value = (False, True)
+            enb.duty_cycle = CW_duty
+            print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
+            CW_duty = CW_duty - duty_step
+            time.sleep(2)
+
+            # rotate counterclockwise
+            in3.value, in4.value = (True, False)
+            enb.duty_cycle = CCW_duty
+            print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+            CCW_duty = CCW_duty - duty_step
+            time.sleep(2)
+
+            # rotate motor 3
+            # rotate clockwise
+            in5.value, in6.value = (False, True)
+            ena2.duty_cycle = CW_duty
+            print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
+            CW_duty = CW_duty - duty_step
+            time.sleep(2)
+
+            # rotate counterclockwise
+            in5.value, in6.value = (True, False)
+            ena2.duty_cycle = CCW_duty
+            print("Rotating 3 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+            CCW_duty = CCW_duty - duty_step
+            time.sleep(2)
+
+            # servo test
+            print("Servo shaft is turning now.")
+            for angle in range(0, 60, 5):  # 0 - 180 degrees, 5 degrees at a time.
+                my_servo.angle = angle
+                time.sleep(0.05)
+            for angle in range(60, 0, -5):  # 180 - 0 degrees, 5 degrees at a time.
+                my_servo.angle = angle
+                time.sleep(0.05)

@@ -124,7 +124,15 @@ while True:
 
             # Print the result
             print(f"Distance: {calibrated_distance:.1f} cm")
-
+            # Arm movement logic, moves arm down if distance is greater than 17 cm and up if less than 15 cm
+            if calibrated_distance >= 17:
+                print("Eavesdrop!")
+                arm_down()
+                time.sleep(0.5)
+            elif calibrated_distance < 15:
+                print("Arm up!")
+                arm_up()
+                time.sleep(0.5)
         except RuntimeError as e:
             print(f"Error: {e}")
         except KeyboardInterrupt:
@@ -132,17 +140,6 @@ while True:
             break
 
         time.sleep(SAMPLE_INTERVAL)
-
-        # rotate motor shaft in alternating directions with decreasing speed
-        while (time.time() - start_time) < time_limit:
-            # servo test
-            print("Servo shaft is turning now.")
-            for angle in range(0, 60, 5):  # 0 - 180 degrees, 5 degrees at a time.
-                my_servo.angle = angle
-                time.sleep(0.05)
-            for angle in range(60, 0, -5):  # 180 - 0 degrees, 5 degrees at a time.
-                my_servo.angle = angle
-                time.sleep(0.05)
 
 def rotate_clockwise(speed=255):
     # rotate motor 1 clockwise
@@ -227,7 +224,7 @@ def move_left(speed=255):
     # rotate motor 3 counterclockwise
     in5.value, in6.value = (True, False)
     ena2.duty_cycle = CCW_duty
-    print("Rotating 3 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    print("Rotating 3 CCW at %f duty cycle" % (100 * (CCW_duty // 2) / max_int))
     CCW_duty = CCW_duty - duty_step
     time.sleep(2)
 
@@ -247,8 +244,17 @@ def move_right(speed=255):
     # rotate motor 3 clockwise
     in5.value, in6.value = (False, True)
     ena2.duty_cycle = CW_duty
-    print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    print("Rotating 3 CW at %f duty cycle" % (100 * (CW_duty // 2) / max_int))
     CW_duty = CW_duty - duty_step
     time.sleep(2)
 
+def arm_up():
+    for angle in range(0, 60, 5):  # 0 - 180 degrees, 5 degrees at a time.
+        my_servo.angle = angle
+        time.sleep(0.05)
+            
+def arm_down():
+    for angle in range(60, 0, -5):  # 180 - 0 degrees, 5 degrees at a time.
+        my_servo.angle = angle
+        time.sleep(0.05)
 

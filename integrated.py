@@ -135,48 +135,6 @@ while True:
 
         # rotate motor shaft in alternating directions with decreasing speed
         while (time.time() - start_time) < time_limit:
-            # rotate motor 1 clockwise
-            in1.value, in2.value = (False, True)
-            ena.duty_cycle = CW_duty
-            print("Rotating 1 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            CW_duty = CW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 1 counterclockwise
-            in1.value, in2.value = (True, False)
-            ena.duty_cycle = CCW_duty
-            print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-            CCW_duty = CCW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 2 clockwise
-            in3.value, in4.value = (False, True)
-            enb.duty_cycle = CW_duty
-            print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            CW_duty = CW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 2 counterclockwise
-            in3.value, in4.value = (True, False)
-            enb.duty_cycle = CCW_duty
-            print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-            CCW_duty = CCW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 3 clockwise
-            in5.value, in6.value = (False, True)
-            ena2.duty_cycle = CW_duty
-            print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            CW_duty = CW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 3 counterclockwise
-            in5.value, in6.value = (True, False)
-            ena2.duty_cycle = CCW_duty
-            print("Rotating 3 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-            CCW_duty = CCW_duty - duty_step
-            time.sleep(2)
-
             # servo test
             print("Servo shaft is turning now.")
             for angle in range(0, 60, 5):  # 0 - 180 degrees, 5 degrees at a time.
@@ -224,6 +182,21 @@ def rotate_counter_clockwise(speed=255):
 
 # Function to move forward
 def move_forward(speed=255):
+    # Motor 1 counterclockwise, Motor 2 clockwise, Motor 3 slide
+    # rotate motor 1 counterclockwise
+    in1.value, in2.value = (True, False)
+    ena.duty_cycle = CCW_duty
+    print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
+    # rotate motor 2 clockwise
+    in3.value, in4.value = (False, True)
+    enb.duty_cycle = CW_duty
+    print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    CW_duty = CW_duty - duty_step
+    time.sleep(2)
+
+# Function to move backward
+def move_backward(speed=255):
     # Motor 1 clockwise, Motor 2 counterclockwise, Motor 3 slide
     # rotate motor 1 clockwise
     in1.value, in2.value = (False, True)
@@ -237,24 +210,45 @@ def move_forward(speed=255):
     CCW_duty = CCW_duty - duty_step
     time.sleep(2)
 
-# Function to move backward
-def move_backward(speed=255):
-    out1 = -speed  # Motor 1 reverse
-    out2 = -speed  # Motor 2 reverse
-    out3 = -speed  # Motor 3 reverse
-    control_motors(out1, out2, out3)
-
 # Function to move left
 def move_left(speed=255):
-    out1 = speed   # Motor 1 forward
-    out2 = -speed  # Motor 2 reverse
-    out3 = 0       # Motor 3 stopped
-    control_motors(out1, out2, out3)
+    # Motor 1 clockwise, Motor 2 clockwise, Motor 3 counterclockwise at half speed
+    # rotate motor 1 clockwise
+    in1.value, in2.value = (False, True)
+    ena.duty_cycle = CW_duty
+    print("Rotating 1 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    CW_duty = CW_duty - duty_step
+    # rotate motor 2 clockwise
+    in3.value, in4.value = (False, True)
+    enb.duty_cycle = CW_duty
+    print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    CW_duty = CW_duty - duty_step
+    time.sleep(2)
+    # rotate motor 3 counterclockwise
+    in5.value, in6.value = (True, False)
+    ena2.duty_cycle = CCW_duty
+    print("Rotating 3 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
+    time.sleep(2)
 
 # Function to move right
 def move_right(speed=255):
-    out1 = -speed  # Motor 1 reverse
-    out2 = speed   # Motor 2 forward
-    out3 = 0       # Motor 3 stopped
-    control_motors(out1, out2, out3)
+    # Motor 1 counterclockwise, Motor 2 counterclockwise, Motor 3 clockwise at half speed
+    # rotate motor 1 counterclockwise
+    in1.value, in2.value = (True, False)
+    ena.duty_cycle = CCW_duty
+    print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
+    # rotate motor 2 counterclockwise
+    in3.value, in4.value = (True, False)
+    enb.duty_cycle = CCW_duty
+    print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
+    # rotate motor 3 clockwise
+    in5.value, in6.value = (False, True)
+    ena2.duty_cycle = CW_duty
+    print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    CW_duty = CW_duty - duty_step
+    time.sleep(2)
+
 

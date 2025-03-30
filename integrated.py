@@ -14,10 +14,18 @@ NUM_SAMPLES = 3        # Number of samples to average (reduces noise)
 MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
 
+# set up buttons as digital input with pull-up resistor
+button1 = digitalio.DigitalInOut(board.GP9)
+button1.direction = digitalio.Direction.INPUT
+button1.pull = digitalio.Pull.UP
 # set up button as digital input with pull-up resistor
-button = digitalio.DigitalInOut(board.GP16)
-button.direction = digitalio.Direction.INPUT
-button.pull = digitalio.Pull.UP
+button2 = digitalio.DigitalInOut(board.GP8)
+button2.direction = digitalio.Direction.INPUT
+button2.pull = digitalio.Pull.UP
+# set up button as digital input with pull-up resistor
+button3 = digitalio.DigitalInOut(board.GP7)
+button3.direction = digitalio.Direction.INPUT
+button3.pull = digitalio.Pull.UP
 
 # set up direction pins as digital outputs for DC motor 1
 in1 = digitalio.DigitalInOut(board.GP14)
@@ -125,11 +133,11 @@ while True:
             # Print the result
             print(f"Distance: {calibrated_distance:.1f} cm")
             # Arm movement logic, moves arm down if distance is greater than 17 cm and up if less than 15 cm
-            if calibrated_distance >= 17:
+            if calibrated_distance >= 15:
                 print("Eavesdrop!")
                 arm_down()
                 time.sleep(0.5)
-            elif calibrated_distance < 15:
+            elif calibrated_distance < 13:
                 print("Arm up!")
                 arm_up()
                 time.sleep(0.5)

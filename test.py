@@ -15,7 +15,7 @@ MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
 
 # set up button as digital input with pull-up resistor
-button = digitalio.DigitalInOut(board.GP16)
+button = digitalio.DigitalInOut(board.GP9)
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP
 
@@ -69,7 +69,7 @@ buffer_index = 0
 def calibrate_distance(raw_distance):
     """Apply calibration formula to raw distance measurement"""
     # Using the same calibration formula
-    return 1.084 * (raw_distance - 9.044) + 10
+    return 3.1385 * raw_distance - 0.5
 
 def get_averaged_distance():
     """Take multiple readings and return the average"""

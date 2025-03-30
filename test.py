@@ -32,19 +32,18 @@ in3.direction = digitalio.Direction.OUTPUT
 in4.direction = digitalio.Direction.OUTPUT
 
 # set up direction pins as digital outputs for DC motor 3
-in5 = digitalio.DigitalInOut(board.GP1)
-in6 = digitalio.DigitalInOut(board.GP0)
+in5 = digitalio.DigitalInOut(board.GP3)
+in6 = digitalio.DigitalInOut(board.GP2)
 in5.direction = digitalio.Direction.OUTPUT
 in6.direction = digitalio.Direction.OUTPUT
 
 # set up motor driving signal as PWM output for DC motor 1
-ena = pwmio.PWMOut(board.GP15, duty_cycle = 0)
+ena = pwmio.PWMOut(board.GP16, duty_cycle = 0)
 enb = pwmio.PWMOut(board.GP10, duty_cycle = 0)
-ena2 = pwmio.PWMOut(board.GP2, duty_cycle = 0)
-# enb2 = pwmio.PWMOut(board.GP21, duty_cycle = 0)
+ena2 = pwmio.PWMOut(board.GP4, duty_cycle = 0)
 
 # create a PWMOut object for servomotor
-pwm = pwmio.PWMOut(board.GP4, duty_cycle=0, frequency=50)
+pwm = pwmio.PWMOut(board.GP6, duty_cycle=0, frequency=50)
 
 # Create a servo object, my_servo.
 my_servo = servo.Servo(pwm)
@@ -182,4 +181,4 @@ while True:
             my_servo.angle = 0
             time.sleep(1)
             my_servo.angle = 110
-            
+

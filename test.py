@@ -48,6 +48,7 @@ pwm = pwmio.PWMOut(board.GP4, duty_cycle=0, frequency=50)
 
 # Create a servo object, my_servo.
 my_servo = servo.Servo(pwm)
+my_servo.angle = 110  # Initialize servo position
 
 # set time limits
 start_time = time.time()
@@ -178,5 +179,7 @@ while True:
             time.sleep(2)
 
             # servo test
+            my_servo.angle = 0
+            time.sleep(1)
             my_servo.angle = 110
             

@@ -5,6 +5,7 @@ import array
 import digitalio
 import pwmio
 import servo
+import asyncio
 
 # Configuration
 TRIGGER_PIN = board.GP19
@@ -108,21 +109,20 @@ def get_averaged_distance():
         raise RuntimeError("Could not get valid readings")
 
 # Add a state variable to track the button press
-button_pressed = False
-last_button_state = button.value  # Store the initial button state
+button1_pressed = False
+last_button1_state = button1.value  # Store the initial button state
 
 # Main loop
 while True:
-    # Check for button press
-    current_button_state = button.value
-    if not current_button_state and last_button_state:  # Detect button press (falling edge)
-        button_pressed = not button_pressed  # Toggle the state
-        print(f"Button pressed. Running: {button_pressed}")
+    # Check for button presses
+    current_button1_state = button1.value
+    if not current_button1_state and last_button1_state:  # Detect button press (falling edge)
+        button1_pressed = not button1_pressed  # Toggle the state
+        print(f"Button pressed. Running: {button1_pressed}")
         time.sleep(0.05)  # Debounce delay
+    last_button1_state = current_button1_state  # Update the last button state
 
-    last_button_state = current_button_state  # Update the last button state
-
-    if button_pressed:
+    if button1_pressed:
         try:
             # Get distance reading with improved small distance detection
             raw_distance = get_averaged_distance()
@@ -257,12 +257,23 @@ def move_right(speed=255):
     time.sleep(2)
 
 def arm_up():
-    for angle in range(0, 60, 5):  # 0 - 180 degrees, 5 degrees at a time.
-        my_servo.angle = angle
-        time.sleep(0.05)
+    my_servo.angle = 110
             
 def arm_down():
-    for angle in range(60, 0, -5):  # 180 - 0 degrees, 5 degrees at a time.
-        my_servo.angle = angle
-        time.sleep(0.05)
+    my_servo.angle = 0
 
+def rotation_test():
+    rotate_clockwise()
+    time.sleep(2)
+    rotate_counter_clockwise()
+    time.sleep(2)
+
+def movement_test():
+    move_forward()
+    time.sleep(2)
+    move_backward()
+    time.sleep(2)
+    move_left()
+    time.sleep(2)
+    move_right()
+    time.sleep(2)

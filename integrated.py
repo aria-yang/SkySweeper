@@ -78,7 +78,7 @@ buffer_index = 0
 def calibrate_distance(raw_distance):
     """Apply calibration formula to raw distance measurement"""
     # Using the same calibration formula
-    return 1.084 * (raw_distance - 9.044) + 10
+    return 3.1385 * raw_distance - 0.5
 
 def get_averaged_distance():
     """Take multiple readings and return the average"""
@@ -112,43 +112,33 @@ def get_averaged_distance():
 button1_pressed = False
 last_button1_state = button1.value  # Store the initial button state
 
-# Main loop
-while True:
-    # Check for button presses
-    current_button1_state = button1.value
-    if not current_button1_state and last_button1_state:  # Detect button press (falling edge)
-        button1_pressed = not button1_pressed  # Toggle the state
-        print(f"Button pressed. Running: {button1_pressed}")
-        time.sleep(0.05)  # Debounce delay
-    last_button1_state = current_button1_state  # Update the last button state
+async def main():
+    # Run both tasks concurrently
+    await asyncio.gather(check_buttons(), main_functions())
 
-    if button1_pressed:
-        try:
-            # Get distance reading with improved small distance detection
-            raw_distance = get_averaged_distance()
+# Start the asyncio event loop
+asyncio.run(main())
 
-            # Apply calibration
-            calibrated_distance = calibrate_distance(raw_distance)
+def ultrasonic_test():
+    # Get distance reading with improved small distance detection
+    raw_distance = get_averaged_distance()
 
-            # Print the result
-            print(f"Distance: {calibrated_distance:.1f} cm")
-            # Arm movement logic, moves arm down if distance is greater than 17 cm and up if less than 15 cm
-            if calibrated_distance >= 15:
-                print("Eavesdrop!")
-                arm_down()
-                time.sleep(0.5)
-            elif calibrated_distance < 13:
-                print("Arm up!")
-                arm_up()
-                time.sleep(0.5)
-        except RuntimeError as e:
-            print(f"Error: {e}")
-        except KeyboardInterrupt:
-            print("Program stopped by user")
-            break
+    # Apply calibration
+    calibrated_distance = calibrate_distance(raw_distance)
 
-        time.sleep(SAMPLE_INTERVAL)
-
+    # Print the result
+    print(f"Distance: {calibrated_distance:.1f} cm")
+    # Arm movement logic, moves arm down if distance is greater than 17 cm and up if less than 15 cm
+    if calibrated_distance >= 15:
+        print("Eavesdrop!")
+        arm_down()
+        time.sleep(0.5)
+    elif calibrated_distance < 13:
+        print("Arm up!")
+        arm_up()
+        time.sleep(0.5)
+    time.sleep(SAMPLE_INTERVAL)
+    
 def rotate_clockwise(speed=255):
     # rotate motor 1 clockwise
     in1.value, in2.value = (False, True)
@@ -277,3 +267,79 @@ def movement_test():
     time.sleep(2)
     move_right()
     time.sleep(2)
+
+async def check_buttons():
+    global button1_pressed, last_button1_state
+    global button2_pressed, last_button2_state
+    global button3_pressed, last_button3_state
+
+    # Initialize button states
+    button1_pressed = False
+    button2_pressed = False
+    button3_pressed = False
+    last_button1_state = button1.value
+    last_button2_state = button2.value
+    last_button3_state = button3.value
+
+    while True:
+        # Check button 1
+        current_button1_state = button1.value
+        if not current_button1_state and last_button1_state:  # Detect button press (falling edge)
+            button1_pressed = not button1_pressed  # Toggle the state
+            print(f"Button 1 pressed. Running: {button1_pressed}")
+            await asyncio.sleep(0.05)  # Debounce delay
+        last_button1_state = current_button1_state  # Update the last button state
+
+        # Check button 2
+        current_button2_state = button2.value
+        if not current_button2_state and last_button2_state:  # Detect button press (falling edge)
+            if button3_pressed:  # If button 3 is pressed, set it to false
+                button3_pressed = False
+            button2_pressed = not button2_pressed  # Toggle the state
+            print(f"Button 2 pressed. Running: {button2_pressed}")
+            await asyncio.sleep(0.05)  # Debounce delay
+        last_button2_state = current_button2_state  # Update the last button state
+
+        # Check button 3
+        current_button3_state = button3.value
+        if not current_button3_state and last_button3_state:  # Detect button press (falling edge)
+            if button2_pressed:  # If button 2 is pressed, set it to false
+                button2_pressed = False
+            button3_pressed = not button3_pressed  # Toggle the state
+            print(f"Button 3 pressed. Running: {button3_pressed}")
+            await asyncio.sleep(0.05)  # Debounce delay
+        last_button3_state = current_button3_state  # Update the last button state
+
+        await asyncio.sleep(0.01)  # Small delay to prevent busy-waiting
+
+async def main_functions():
+    while True:
+        # State: ultrasonic
+        if button1_pressed and not button2_pressed and not button3_pressed:
+            ultrasonic_test()
+            await asyncio.sleep(SAMPLE_INTERVAL)
+        
+        # State: rotation test
+        elif not button1_pressed and button2_pressed and not button3_pressed:
+            rotation_test()
+            await asyncio.sleep(SAMPLE_INTERVAL)
+            
+        # State: rotation test w/ ultrasonic
+        elif button1_pressed and button2_pressed and not button3_pressed:
+            ultrasonic_test()
+            rotation_test()
+            await asyncio.sleep(SAMPLE_INTERVAL)
+
+        # State: movement test
+        elif not button1_pressed and not button2_pressed and button3_pressed:
+            movement_test()
+            await asyncio.sleep(SAMPLE_INTERVAL)
+
+        # State: movement test w/ ultrasonic
+        elif button1_pressed and not button2_pressed and button3_pressed:
+            ultrasonic_test()
+            movement_test()
+            await asyncio.sleep(SAMPLE_INTERVAL)
+        else:
+            await asyncio.sleep(0.1)  # Check less frequently if button is not pressed
+

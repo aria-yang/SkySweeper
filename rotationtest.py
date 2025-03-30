@@ -1,0 +1,158 @@
+import time
+import board
+import adafruit_hcsr04
+import array
+import digitalio
+import pwmio
+import servo
+
+# Configuration
+TRIGGER_PIN = board.GP19
+ECHO_PIN = board.GP18
+SAMPLE_INTERVAL = 0.5  # Faster sampling for better responsiveness
+NUM_SAMPLES = 3        # Number of samples to average (reduces noise)
+MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
+TIMEOUT = 1.0          # Timeout for sensor readings in seconds
+
+# set up button as digital input with pull-up resistor
+button = digitalio.DigitalInOut(board.GP9)
+button.direction = digitalio.Direction.INPUT
+button.pull = digitalio.Pull.UP
+
+# set up direction pins as digital outputs for DC motor 1
+in1 = digitalio.DigitalInOut(board.GP14)
+in2 = digitalio.DigitalInOut(board.GP13)
+in1.direction = digitalio.Direction.OUTPUT
+in2.direction = digitalio.Direction.OUTPUT
+
+# set up direction pins as digital outputs for DC motor 2
+in3 = digitalio.DigitalInOut(board.GP12)
+in4 = digitalio.DigitalInOut(board.GP11)
+in3.direction = digitalio.Direction.OUTPUT
+in4.direction = digitalio.Direction.OUTPUT
+
+# set up direction pins as digital outputs for DC motor 3
+in5 = digitalio.DigitalInOut(board.GP3)
+in6 = digitalio.DigitalInOut(board.GP2)
+in5.direction = digitalio.Direction.OUTPUT
+in6.direction = digitalio.Direction.OUTPUT
+
+# set up motor driving signal as PWM output for DC motor 1
+ena = pwmio.PWMOut(board.GP16, duty_cycle = 0)
+enb = pwmio.PWMOut(board.GP10, duty_cycle = 0)
+ena2 = pwmio.PWMOut(board.GP4, duty_cycle = 0)
+
+# create a PWMOut object for servomotor
+pwm = pwmio.PWMOut(board.GP6, duty_cycle=0, frequency=50)
+
+# Create a servo object, my_servo.
+my_servo = servo.Servo(pwm)
+my_servo.angle = 110  # Initialize servo position
+
+# set time limits
+start_time = time.time()
+time_limit = 20
+
+# set starting (fastest) motor duty cycles
+CW_duty = 50000
+CCW_duty = 50000
+duty_step = 5000
+max_int = 65535
+
+# Initialize sensor
+sonar = adafruit_hcsr04.HCSR04(trigger_pin=TRIGGER_PIN, echo_pin=ECHO_PIN, timeout=TIMEOUT)
+
+# Buffer for averaging readings
+distance_buffer = array.array('f', [0] * NUM_SAMPLES)
+buffer_index = 0
+
+def calibrate_distance(raw_distance):
+    """Apply calibration formula to raw distance measurement"""
+    # Using the same calibration formula
+    return 3.1385 * raw_distance - 0.5
+
+def get_averaged_distance():
+    """Take multiple readings and return the average"""
+    samples_collected = 0
+    attempts = 0
+    max_attempts = 5
+
+    # Try to fill the buffer with valid readings
+    while samples_collected < NUM_SAMPLES and attempts < max_attempts:
+        try:
+            raw_distance = sonar.distance
+
+            # Filter out unreasonably small values that might be errors
+            if raw_distance >= MIN_DISTANCE:
+                distance_buffer[buffer_index % NUM_SAMPLES] = raw_distance
+                samples_collected += 1
+
+        except RuntimeError:
+            pass  # Skip failed readings
+
+        attempts += 1
+        time.sleep(0.1)  # Brief pause between samples
+
+    # If we have at least one sample, calculate average
+    if samples_collected > 0:
+        return sum(distance_buffer) / samples_collected
+    else:
+        raise RuntimeError("Could not get valid readings")
+
+# Add a state variable to track the button press
+button_pressed = False
+last_button_state = button.value  # Store the initial button state
+
+# Main loop
+while True:
+    # Check for button press
+    current_button_state = button.value
+    if not current_button_state and last_button_state:  # Detect button press (falling edge)
+        button_pressed = not button_pressed  # Toggle the state
+        print(f"Button pressed. Running: {button_pressed}")
+        time.sleep(0.05)  # Debounce delay
+
+    last_button_state = current_button_state  # Update the last button state
+
+    if button_pressed:
+        try:
+            # Get distance reading with improved small distance detection
+            raw_distance = get_averaged_distance()
+
+            # Apply calibration
+            calibrated_distance = calibrate_distance(raw_distance)
+
+            # Print the result
+            print(f"Distance: {calibrated_distance:.1f} cm")
+
+        except RuntimeError as e:
+            print(f"Error: {e}")
+        except KeyboardInterrupt:
+            print("Program stopped by user")
+            break
+
+        time.sleep(SAMPLE_INTERVAL)
+
+        # rotate motor shaft in alternating directions with decreasing speed
+        while (time.time() - start_time) < time_limit:
+            # rotate motor 1 clockwise
+            in1.value, in2.value = (False, True)
+            ena.duty_cycle = CW_duty
+            print("Rotating 1 CW at %f duty cycle" % (100 * CW_duty / max_int))
+            # rotate motor 2 clockwise
+            in3.value, in4.value = (False, True)
+            enb.duty_cycle = CW_duty
+            print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
+            # rotate motor 3 clockwise
+            in5.value, in6.value = (False, True)
+            ena2.duty_cycle = CW_duty
+            print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
+            time.sleep(2)
+
+            ena.duty_cycle = 0
+            enb.duty_cycle = 0
+            ena2.duty_cycle = 0
+            in1.value, in2.value = (False, False)
+            in3.value, in4.value = (False, False)
+            in5.value, in6.value = (False, False)
+            print("Stopping motors")

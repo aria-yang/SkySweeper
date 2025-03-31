@@ -238,6 +238,14 @@ def movement_test():
     move_right()
     time.sleep(2)
 
+def arm_test():
+    if calibrated_distance >= 21:
+        lower_arm()
+    elif calibrated_distance < 20.5:
+        raise_arm()
+    else:
+        print("Distance is within range, no action taken.")
+        
 # Add a state variable to track the button press
 button_pressed = False
 last_button_state = button.value  # Store the initial button state

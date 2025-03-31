@@ -230,13 +230,31 @@ def rotation_test():
 
 def movement_test():
     move_forward()
-    time.sleep(2)
+    time.sleep(1)
     move_backward()
-    time.sleep(2)
+    time.sleep(1)
     move_left()
-    time.sleep(2)
+    time.sleep(1)
     move_right()
-    time.sleep(2)
+    time.sleep(1)
+
+def off():
+    my_servo.angle = 110
+    ena.duty_cycle = 0
+    enb.duty_cycle = 0
+    ena2.duty_cycle = 0
+    in1.value, in2.value = (False, False)
+    in3.value, in4.value = (False, False)
+    in5.value, in6.value = (False, False)
+    print("Stopping motors and turning off servo")
+
+def arm_test():
+    if calibrated_distance >= 21:
+        lower_arm()
+    elif calibrated_distance < 20.5:
+        raise_arm()
+    else:
+        print("Distance is within range, no action taken.")
 
 # Add a state variable to track the button press
 button_pressed = False
@@ -274,4 +292,5 @@ while True:
 
         # WRITE CODE HERE FOR TEST
         movement_test()
+        off()
         button_pressed = False  # Reset button pressed state

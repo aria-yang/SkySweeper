@@ -58,8 +58,8 @@ my_servo.angle = 110  # Initialize servo position
 
 # set time limits
 start_time = time.time()
-time_limit = 10
-time_limit2 = 20
+time_limit = 18
+time_limit2 = 32
 
 # set starting (fastest) motor duty cycles
 CW_duty_wood = 50000

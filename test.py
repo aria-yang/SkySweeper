@@ -15,7 +15,7 @@ MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
 
 # set up button as digital input with pull-up resistor
-button = digitalio.DigitalInOut(board.GP9)
+button = digitalio.DigitalInOut(board.GP28)
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP
 

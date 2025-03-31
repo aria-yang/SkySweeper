@@ -1,3 +1,4 @@
+# Write your code here :-)
 import time
 import board
 import adafruit_hcsr04
@@ -38,15 +39,15 @@ in3.direction = digitalio.Direction.OUTPUT
 in4.direction = digitalio.Direction.OUTPUT
 
 # set up direction pins as digital outputs for DC motor 3
-in5 = digitalio.DigitalInOut(board.GP3)
-in6 = digitalio.DigitalInOut(board.GP2)
+in5 = digitalio.DigitalInOut(board.GP21)
+in6 = digitalio.DigitalInOut(board.GP22)
 in5.direction = digitalio.Direction.OUTPUT
 in6.direction = digitalio.Direction.OUTPUT
 
 # set up motor driving signal as PWM output for DC motor 1
 ena = pwmio.PWMOut(board.GP16, duty_cycle = 0)
 enb = pwmio.PWMOut(board.GP10, duty_cycle = 0)
-ena2 = pwmio.PWMOut(board.GP4, duty_cycle = 0)
+ena2 = pwmio.PWMOut(board.GP20, duty_cycle = 0)
 
 # create a PWMOut object for servomotor
 pwm = pwmio.PWMOut(board.GP6, duty_cycle=0, frequency=50)
@@ -57,11 +58,14 @@ my_servo.angle = 110  # Initialize servo position
 
 # set time limits
 start_time = time.time()
-time_limit = 20
+time_limit = 10
+time_limit2 = 20
 
 # set starting (fastest) motor duty cycles
-CW_duty = 50000
-CCW_duty = 50000
+CW_duty_wood = 50000
+CW_duty = 39000
+CCW_duty_wood = 50000
+CCW_duty = 39000
 duty_step = 5000
 max_int = 65535
 
@@ -141,24 +145,39 @@ while True:
 
         # rotate motor shaft in alternating directions with decreasing speed
         while (time.time() - start_time) < time_limit:
-            # rotate motor 1 clockwise
-            in1.value, in2.value = (False, True)
+            #rotate motor 1 clockwise
+            in1.value, in2.value = (True, False)
             ena.duty_cycle = CW_duty
             print("Rotating 1 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            # rotate motor 2 clockwise
+            #rotate motor 2 clockwise
             in3.value, in4.value = (False, True)
             enb.duty_cycle = CW_duty
             print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            # rotate motor 3 clockwise
+            #rotate motor 3 clockwise
             in5.value, in6.value = (False, True)
-            ena2.duty_cycle = CW_duty
-            print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
+            ena2.duty_cycle = CW_duty_wood
+            print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty_wood / max_int))
+            time.sleep(2)
+            
+        while (time.time() - start_time) < time_limit2:
+            # rotate motor 1 counter clockwise
+            in1.value, in2.value = (False, True)
+            ena.duty_cycle = CCW_duty
+            print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+            # rotate motor 2 counter clockwise
+            in3.value, in4.value = (True, False)
+            enb.duty_cycle = CCW_duty
+            print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+            # rotate motor 3 counter clockwise
+            in5.value, in6.value = (True, False)
+            ena2.duty_cycle = CCW_duty_wood
+            print("Rotating 3 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
             time.sleep(2)
 
-            ena.duty_cycle = 0
-            enb.duty_cycle = 0
-            ena2.duty_cycle = 0
-            in1.value, in2.value = (False, False)
-            in3.value, in4.value = (False, False)
-            in5.value, in6.value = (False, False)
-            print("Stopping motors")
+        ena.duty_cycle = 0
+        enb.duty_cycle = 0
+        ena2.duty_cycle = 0
+        in1.value, in2.value = (False, False)
+        in3.value, in4.value = (False, False)
+        in5.value, in6.value = (False, False)
+        print("Stopping motors")

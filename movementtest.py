@@ -15,15 +15,9 @@ MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
 
 # set up button as digital input with pull-up resistor
-button = digitalio.DigitalInOut(board.GP26)
+button = digitalio.DigitalInOut(board.GP9)
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP
-button2 = digitalio.DigitalInOut(board.GP28)
-button2.direction = digitalio.Direction.INPUT
-button2.pull = digitalio.Pull.UP
-button3 = digitalio.DigitalInOut(board.GP27)
-button3.direction = digitalio.Direction.INPUT
-button3.pull = digitalio.Pull.UP
 
 # set up direction pins as digital outputs for DC motor 1
 in1 = digitalio.DigitalInOut(board.GP14)
@@ -57,7 +51,7 @@ my_servo.angle = 110  # Initialize servo position
 
 # set time limits
 start_time = time.time()
-time_limit = 20
+time_limit = 7
 
 # set starting (fastest) motor duty cycles
 CW_duty = 50000
@@ -153,7 +147,6 @@ while True:
             in5.value, in6.value = (False, True)
             ena2.duty_cycle = CW_duty
             print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            time.sleep(2)
 
             ena.duty_cycle = 0
             enb.duty_cycle = 0

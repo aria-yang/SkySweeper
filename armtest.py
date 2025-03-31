@@ -105,6 +105,11 @@ def get_averaged_distance():
     else:
         raise RuntimeError("Could not get valid readings")
 
+def raise_arm():
+    my_servo.angle = 110
+def lower_arm():
+    my_servo.angle = 0
+
 # Add a state variable to track the button press
 button_pressed = False
 last_button_state = button.value  # Store the initial button state
@@ -121,44 +126,18 @@ while True:
     last_button_state = current_button_state  # Update the last button state
 
     if button_pressed:
-        try:
+        while time.time() - start_time < time_limit:
             # Get distance reading with improved small distance detection
             raw_distance = get_averaged_distance()
 
             # Apply calibration
             calibrated_distance = calibrate_distance(raw_distance)
-
+            if calibrated_distance >= 20:
+                lower_arm()
+            elif calibrated_distance < 19:
+                raise_arm()
             # Print the result
             print(f"Distance: {calibrated_distance:.1f} cm")
+            time.sleep(SAMPLE_INTERVAL)
 
-        except RuntimeError as e:
-            print(f"Error: {e}")
-        except KeyboardInterrupt:
-            print("Program stopped by user")
-            break
-
-        time.sleep(SAMPLE_INTERVAL)
-
-        # rotate motor shaft in alternating directions with decreasing speed
-        while (time.time() - start_time) < time_limit:
-            # rotate motor 1 clockwise
-            in1.value, in2.value = (False, True)
-            ena.duty_cycle = CW_duty
-            print("Rotating 1 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            # rotate motor 2 clockwise
-            in3.value, in4.value = (False, True)
-            enb.duty_cycle = CW_duty
-            print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            # rotate motor 3 clockwise
-            in5.value, in6.value = (False, True)
-            ena2.duty_cycle = CW_duty
-            print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            time.sleep(2)
-
-            ena.duty_cycle = 0
-            enb.duty_cycle = 0
-            ena2.duty_cycle = 0
-            in1.value, in2.value = (False, False)
-            in3.value, in4.value = (False, False)
-            in5.value, in6.value = (False, False)
-            print("Stopping motors")
+       

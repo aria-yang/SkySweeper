@@ -157,6 +157,7 @@ def move_forward(speed=255):
     in3.value, in4.value = (False, True)
     enb.duty_cycle = CW_duty
     print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    CW_duty = CW_duty - duty_step
     time.sleep(2)
 
 
@@ -171,6 +172,7 @@ def move_backward(speed=255):
     in3.value, in4.value = (True, False)
     enb.duty_cycle = CCW_duty
     print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
     time.sleep(2)
 
 
@@ -243,9 +245,9 @@ def off():
 
 def arm_test():
     if calibrated_distance >= 21:
-        lower_arm()
+        arm_down()
     elif calibrated_distance < 20.5:
-        raise_arm()
+        arm_up()
     else:
         print("Distance is within range, no action taken.")
 

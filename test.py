@@ -157,7 +157,6 @@ def move_forward(speed=255):
     in3.value, in4.value = (False, True)
     enb.duty_cycle = CW_duty
     print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
-    CW_duty = CW_duty - duty_step
     time.sleep(2)
 
 
@@ -172,7 +171,6 @@ def move_backward(speed=255):
     in3.value, in4.value = (True, False)
     enb.duty_cycle = CCW_duty
     print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-    CCW_duty = CCW_duty - duty_step
     time.sleep(2)
 
 
@@ -187,13 +185,11 @@ def move_left(speed=255):
     in3.value, in4.value = (False, True)
     enb.duty_cycle = CW_duty
     print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
-    CW_duty = CW_duty
     time.sleep(2)
     # rotate motor 3 counterclockwise
     in5.value, in6.value = (True, False)
     ena2.duty_cycle = CCW_duty
     print("Rotating 3 CCW at %f duty cycle" % (100 * (CCW_duty_wood // 2) / max_int))
-    CCW_duty = CCW_duty
     time.sleep(2)
 
 # Function to move right
@@ -203,17 +199,14 @@ def move_right(speed=255):
     in1.value, in2.value = (True, False)
     ena.duty_cycle = CCW_duty
     print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-    CCW_duty = CCW_duty - duty_step
     # rotate motor 2 counterclockwise
     in3.value, in4.value = (True, False)
     enb.duty_cycle = CCW_duty
     print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-    CCW_duty = CCW_duty - duty_step
     # rotate motor 3 clockwise
     in5.value, in6.value = (False, True)
     ena2.duty_cycle = CW_duty
     print("Rotating 3 CW at %f duty cycle" % (100 * (CW_duty_wood // 2) / max_int))
-    CW_duty = CW_duty - duty_step
     time.sleep(2)
 
 def arm_up():

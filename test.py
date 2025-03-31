@@ -1,3 +1,4 @@
+# Write your code here :-)
 import time
 import board
 import adafruit_hcsr04
@@ -15,9 +16,15 @@ MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
 
 # set up button as digital input with pull-up resistor
-button = digitalio.DigitalInOut(board.GP28)
+button = digitalio.DigitalInOut(board.GP26)
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP
+button2 = digitalio.DigitalInOut(board.GP28)
+button2.direction = digitalio.Direction.INPUT
+button2.pull = digitalio.Pull.UP
+button3 = digitalio.DigitalInOut(board.GP27)
+button3.direction = digitalio.Direction.INPUT
+button3.pull = digitalio.Pull.UP
 
 # set up direction pins as digital outputs for DC motor 1
 in1 = digitalio.DigitalInOut(board.GP14)
@@ -32,15 +39,15 @@ in3.direction = digitalio.Direction.OUTPUT
 in4.direction = digitalio.Direction.OUTPUT
 
 # set up direction pins as digital outputs for DC motor 3
-in5 = digitalio.DigitalInOut(board.GP3)
-in6 = digitalio.DigitalInOut(board.GP2)
+in5 = digitalio.DigitalInOut(board.GP21)
+in6 = digitalio.DigitalInOut(board.GP22)
 in5.direction = digitalio.Direction.OUTPUT
 in6.direction = digitalio.Direction.OUTPUT
 
 # set up motor driving signal as PWM output for DC motor 1
-ena = pwmio.PWMOut(board.GP16, duty_cycle = 0)
-enb = pwmio.PWMOut(board.GP10, duty_cycle = 0)
-ena2 = pwmio.PWMOut(board.GP4, duty_cycle = 0)
+ena = pwmio.PWMOut(board.GP16, duty_cycle=0)
+enb = pwmio.PWMOut(board.GP10, duty_cycle=0)
+ena2 = pwmio.PWMOut(board.GP20, duty_cycle=0)
 
 # create a PWMOut object for servomotor
 pwm = pwmio.PWMOut(board.GP6, duty_cycle=0, frequency=50)
@@ -51,11 +58,14 @@ my_servo.angle = 110  # Initialize servo position
 
 # set time limits
 start_time = time.time()
-time_limit = 20
+time_limit = 18
+time_limit2 = 32
 
 # set starting (fastest) motor duty cycles
-CW_duty = 50000
-CCW_duty = 50000
+CW_duty_wood = 50000
+CW_duty = 39000
+CCW_duty_wood = 50000
+CCW_duty = 39000
 duty_step = 5000
 max_int = 65535
 
@@ -66,10 +76,12 @@ sonar = adafruit_hcsr04.HCSR04(trigger_pin=TRIGGER_PIN, echo_pin=ECHO_PIN, timeo
 distance_buffer = array.array('f', [0] * NUM_SAMPLES)
 buffer_index = 0
 
+
 def calibrate_distance(raw_distance):
     """Apply calibration formula to raw distance measurement"""
     # Using the same calibration formula
     return 3.1385 * raw_distance - 0.5
+
 
 def get_averaged_distance():
     """Take multiple readings and return the average"""
@@ -98,6 +110,133 @@ def get_averaged_distance():
         return sum(distance_buffer) / samples_collected
     else:
         raise RuntimeError("Could not get valid readings")
+
+
+def rotate_clockwise(speed=255):
+    # rotate motor 1 clockwise
+    in1.value, in2.value = (False, True)
+    ena.duty_cycle = CCW_duty
+    print("Rotating 1 CW at %f duty cycle" % (100 * CCW_duty / max_int))
+    # rotate motor 2 clockwise
+    in3.value, in4.value = (False, True)
+    enb.duty_cycle = CW_duty
+    print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    # rotate motor 3 clockwise
+    in5.value, in6.value = (False, True)
+    ena2.duty_cycle = CW_duty
+    print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty_wood / max_int))
+    time.sleep(2)
+
+
+def rotate_counter_clockwise(speed=255):
+    # rotate motor 1 counterclockwise
+    in1.value, in2.value = (True, False)
+    ena.duty_cycle = CW_duty
+    print("Rotating 1 CCW at %f duty cycle" % (100 * CW_duty / max_int))
+    # rotate motor 2 counterclockwise
+    in3.value, in4.value = (True, False)
+    enb.duty_cycle = CCW_duty
+    print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
+    # rotate motor 3 counterclockwise
+    in5.value, in6.value = (True, False)
+    ena2.duty_cycle = CCW_duty
+    print("Rotating 3 CCW at %f duty cycle" % (100 * CCW_duty_wood / max_int))
+    CCW_duty = CCW_duty - duty_step
+    time.sleep(2)
+
+
+# Function to move forward
+def move_forward(speed=255):
+    # Motor 1 counterclockwise, Motor 2 clockwise, Motor 3 slide
+    # rotate motor 1 counterclockwise
+    in1.value, in2.value = (True, False)
+    ena.duty_cycle = CW_duty
+    print("Rotating 1 CCW at %f duty cycle" % (100 * CW_duty / max_int))
+    # rotate motor 2 clockwise
+    in3.value, in4.value = (False, True)
+    enb.duty_cycle = CW_duty
+    print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    CW_duty = CW_duty - duty_step
+    time.sleep(2)
+
+
+# Function to move backward
+def move_backward(speed=255):
+    # Motor 1 clockwise, Motor 2 counterclockwise, Motor 3 slide
+    # rotate motor 1 clockwise
+    in1.value, in2.value = (False, True)
+    ena.duty_cycle = CCW_duty
+    print("Rotating 1 CW at %f duty cycle" % (100 * CCW_duty / max_int))
+    # rotate motor 2 counterclockwise
+    in3.value, in4.value = (True, False)
+    enb.duty_cycle = CCW_duty
+    print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
+    time.sleep(2)
+
+
+# Function to move left
+def move_left(speed=255):
+    # Motor 1 clockwise, Motor 2 clockwise, Motor 3 counterclockwise at half speed
+    # rotate motor 1 clockwise
+    in1.value, in2.value = (False, True)
+    ena.duty_cycle = CCW_duty
+    print("Rotating 1 CW at %f duty cycle" % (100 * CCW_duty / max_int))
+    # rotate motor 2 clockwise
+    in3.value, in4.value = (False, True)
+    enb.duty_cycle = CW_duty
+    print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
+    CW_duty = CW_duty
+    time.sleep(2)
+    # rotate motor 3 counterclockwise
+    in5.value, in6.value = (True, False)
+    ena2.duty_cycle = CCW_duty
+    print("Rotating 3 CCW at %f duty cycle" % (100 * (CCW_duty_wood // 2) / max_int))
+    CCW_duty = CCW_duty
+    time.sleep(2)
+
+# Function to move right
+def move_right(speed=255):
+    # Motor 1 counterclockwise, Motor 2 counterclockwise, Motor 3 clockwise at half speed
+    # rotate motor 1 counterclockwise
+    in1.value, in2.value = (True, False)
+    ena.duty_cycle = CCW_duty
+    print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
+    # rotate motor 2 counterclockwise
+    in3.value, in4.value = (True, False)
+    enb.duty_cycle = CCW_duty
+    print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
+    CCW_duty = CCW_duty - duty_step
+    # rotate motor 3 clockwise
+    in5.value, in6.value = (False, True)
+    ena2.duty_cycle = CW_duty
+    print("Rotating 3 CW at %f duty cycle" % (100 * (CW_duty_wood // 2) / max_int))
+    CW_duty = CW_duty - duty_step
+    time.sleep(2)
+
+def arm_up():
+    my_servo.angle = 110
+
+def arm_down():
+    my_servo.angle = 0
+
+def rotation_test():
+    rotate_clockwise()
+    time.sleep(2)
+    rotate_counter_clockwise()
+    time.sleep(2)
+
+def movement_test():
+    move_forward()
+    time.sleep(2)
+    move_backward()
+    time.sleep(2)
+    move_left()
+    time.sleep(2)
+    move_right()
+    time.sleep(2)
 
 # Add a state variable to track the button press
 button_pressed = False
@@ -133,52 +272,6 @@ while True:
 
         time.sleep(SAMPLE_INTERVAL)
 
-        # rotate motor shaft in alternating directions with decreasing speed
-        while (time.time() - start_time) < time_limit:
-            # rotate motor 1 clockwise
-            in1.value, in2.value = (False, True)
-            ena.duty_cycle = CW_duty
-            print("Rotating 1 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            CW_duty = CW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 1 counterclockwise
-            in1.value, in2.value = (True, False)
-            ena.duty_cycle = CCW_duty
-            print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-            CCW_duty = CCW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 2 clockwise
-            in3.value, in4.value = (False, True)
-            enb.duty_cycle = CW_duty
-            print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            CW_duty = CW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 2 counterclockwise
-            in3.value, in4.value = (True, False)
-            enb.duty_cycle = CCW_duty
-            print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-            CCW_duty = CCW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 3 clockwise
-            in5.value, in6.value = (False, True)
-            ena2.duty_cycle = CW_duty
-            print("Rotating 3 CW at %f duty cycle" % (100 * CW_duty / max_int))
-            CW_duty = CW_duty - duty_step
-            time.sleep(2)
-
-            # rotate motor 3 counterclockwise
-            in5.value, in6.value = (True, False)
-            ena2.duty_cycle = CCW_duty
-            print("Rotating 3 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-            CCW_duty = CCW_duty - duty_step
-            time.sleep(2)
-
-            # servo test
-            my_servo.angle = 0
-            time.sleep(1)
-            my_servo.angle = 110
-
+        # WRITE CODE HERE FOR TEST
+        movement_test()
+        button_pressed = False  # Reset button pressed state

@@ -181,3 +181,4 @@ while True:
         in3.value, in4.value = (False, False)
         in5.value, in6.value = (False, False)
         print("Stopping motors")
+        button_pressed = False  # Reset button pressed state

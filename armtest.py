@@ -15,15 +15,9 @@ MIN_DISTANCE = 2       # Minimum distance in cm the sensor can reliably detect
 TIMEOUT = 1.0          # Timeout for sensor readings in seconds
 
 # set up button as digital input with pull-up resistor
-button = digitalio.DigitalInOut(board.GP26)
+button = digitalio.DigitalInOut(board.GP28)
 button.direction = digitalio.Direction.INPUT
 button.pull = digitalio.Pull.UP
-button2 = digitalio.DigitalInOut(board.GP28)
-button2.direction = digitalio.Direction.INPUT
-button2.pull = digitalio.Pull.UP
-button3 = digitalio.DigitalInOut(board.GP27)
-button3.direction = digitalio.Direction.INPUT
-button3.pull = digitalio.Pull.UP
 
 # set up direction pins as digital outputs for DC motor 1
 in1 = digitalio.DigitalInOut(board.GP14)
@@ -105,15 +99,15 @@ def get_averaged_distance():
     else:
         raise RuntimeError("Could not get valid readings")
 
-def raise_arm():
-    my_servo.angle = 110
-def lower_arm():
-    my_servo.angle = 0
-
 # Add a state variable to track the button press
 button_pressed = False
 last_button_state = button.value  # Store the initial button state
 
+def raise_arm():
+    my_servo.angle = 110
+def lower_arm():
+    my_servo.angle = 0
+    
 # Main loop
 while True:
     # Check for button press
@@ -124,7 +118,23 @@ while True:
         time.sleep(0.05)  # Debounce delay
 
     last_button_state = current_button_state  # Update the last button state
+    try:
+        # Get distance reading with improved small distance detection
+        raw_distance = get_averaged_distance()
 
+        # Apply calibration
+        calibrated_distance = calibrate_distance(raw_distance)
+
+        # Print the result
+        print(f"Distance: {calibrated_distance:.1f} cm")
+
+    except RuntimeError as e:
+        print(f"Error: {e}")
+    except KeyboardInterrupt:
+        print("Program stopped by user")
+        break
+
+    time.sleep(SAMPLE_INTERVAL)
     if button_pressed:
         while time.time() - start_time < time_limit:
             # Get distance reading with improved small distance detection
@@ -132,12 +142,10 @@ while True:
 
             # Apply calibration
             calibrated_distance = calibrate_distance(raw_distance)
-            if calibrated_distance >= 20:
+            if calibrated_distance >= 21:
                 lower_arm()
-            elif calibrated_distance < 19:
+            elif calibrated_distance < 20.5:
                 raise_arm()
             # Print the result
             print(f"Distance: {calibrated_distance:.1f} cm")
             time.sleep(SAMPLE_INTERVAL)
-
-       

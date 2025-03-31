@@ -66,7 +66,6 @@ CW_duty_wood = 50000
 CW_duty = 39000
 CCW_duty_wood = 50000
 CCW_duty = 39000
-duty_step = 5000
 max_int = 65535
 
 # Initialize sensor
@@ -113,8 +112,9 @@ def get_averaged_distance():
 
 
 def rotate_clockwise(speed=255):
+    global CW_duty_wood, CCW_duty_wood, CCW_duty, CW_duty
     # rotate motor 1 clockwise
-    in1.value, in2.value = (False, True)
+    in1.value, in2.value = (True, False)
     ena.duty_cycle = CCW_duty
     print("Rotating 1 CW at %f duty cycle" % (100 * CCW_duty / max_int))
     # rotate motor 2 clockwise
@@ -129,8 +129,9 @@ def rotate_clockwise(speed=255):
 
 
 def rotate_counter_clockwise(speed=255):
+    global CW_duty_wood, CCW_duty_wood, CCW_duty, CW_duty
     # rotate motor 1 counterclockwise
-    in1.value, in2.value = (True, False)
+    in1.value, in2.value = (False, True)
     ena.duty_cycle = CW_duty
     print("Rotating 1 CCW at %f duty cycle" % (100 * CW_duty / max_int))
     # rotate motor 2 counterclockwise
@@ -147,10 +148,11 @@ def rotate_counter_clockwise(speed=255):
 
 
 # Function to move forward
-def move_forward(speed=255):
+def move_backward(speed=255):
+    global CW_duty_wood, CCW_duty_wood, CCW_duty, CW_duty
     # Motor 1 counterclockwise, Motor 2 clockwise, Motor 3 slide
     # rotate motor 1 counterclockwise
-    in1.value, in2.value = (True, False)
+    in1.value, in2.value = (False, True)
     ena.duty_cycle = CW_duty
     print("Rotating 1 CCW at %f duty cycle" % (100 * CW_duty / max_int))
     # rotate motor 2 clockwise
@@ -162,10 +164,11 @@ def move_forward(speed=255):
 
 
 # Function to move backward
-def move_backward(speed=255):
+def move_forward(speed=255):
+    global CW_duty_wood, CCW_duty_wood, CCW_duty, CW_duty
     # Motor 1 clockwise, Motor 2 counterclockwise, Motor 3 slide
     # rotate motor 1 clockwise
-    in1.value, in2.value = (False, True)
+    in1.value, in2.value = (True, False)
     ena.duty_cycle = CCW_duty
     print("Rotating 1 CW at %f duty cycle" % (100 * CCW_duty / max_int))
     # rotate motor 2 counterclockwise
@@ -177,17 +180,17 @@ def move_backward(speed=255):
 
 
 # Function to move left
-def move_left(speed=255):
+def move_right(speed=255):
+    global CW_duty_wood, CCW_duty_wood, CCW_duty, CW_duty
     # Motor 1 clockwise, Motor 2 clockwise, Motor 3 counterclockwise at half speed
     # rotate motor 1 clockwise
-    in1.value, in2.value = (False, True)
+    in1.value, in2.value = (True, False)
     ena.duty_cycle = CCW_duty
     print("Rotating 1 CW at %f duty cycle" % (100 * CCW_duty / max_int))
     # rotate motor 2 clockwise
     in3.value, in4.value = (False, True)
     enb.duty_cycle = CW_duty
     print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
-    time.sleep(2)
     # rotate motor 3 counterclockwise
     in5.value, in6.value = (True, False)
     ena2.duty_cycle = CCW_duty
@@ -195,10 +198,11 @@ def move_left(speed=255):
     time.sleep(2)
 
 # Function to move right
-def move_right(speed=255):
+def move_left(speed=255):
+    global CW_duty_wood, CCW_duty_wood, CCW_duty, CW_duty
     # Motor 1 counterclockwise, Motor 2 counterclockwise, Motor 3 clockwise at half speed
     # rotate motor 1 counterclockwise
-    in1.value, in2.value = (True, False)
+    in1.value, in2.value = (False, True)
     ena.duty_cycle = CCW_duty
     print("Rotating 1 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
     # rotate motor 2 counterclockwise

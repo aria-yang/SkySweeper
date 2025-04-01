@@ -293,6 +293,11 @@ while True:
         time.sleep(SAMPLE_INTERVAL)
 
         # WRITE CODE HERE FOR TEST
-        forward_backward()
+        my_servo.angle = 55
+        time.sleep(2)
+        my_servo.angle = 0
+        time.sleep(2)
+        my_servo.angle = 55
+        time.sleep(2)
         off()
         button_pressed = False  # Reset button pressed state

@@ -50,7 +50,7 @@ enb = pwmio.PWMOut(board.GP10, duty_cycle=0)
 ena2 = pwmio.PWMOut(board.GP20, duty_cycle=0)
 
 # create a PWMOut object for servomotor
-pwm = pwmio.PWMOut(board.GP6, duty_cycle=0, frequency=50)
+pwm = pwmio.PWMOut(board.GP27, duty_cycle=0, frequency=50)
 
 # Create a servo object, my_servo.
 my_servo = servo.Servo(pwm)

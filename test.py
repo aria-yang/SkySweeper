@@ -135,10 +135,9 @@ def rotate_counter_clockwise(speed=255):
     ena.duty_cycle = CW_duty
     print("Rotating 1 CCW at %f duty cycle" % (100 * CW_duty / max_int))
     # rotate motor 2 counterclockwise
-    in3.value, in4.value = (True, False)
-    enb.duty_cycle = CCW_duty
-    print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-    CCW_duty = CCW_duty - duty_step
+    in3.value, in4.value = (False, True)
+    enb.duty_cycle = CW_duty
+    print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
     # rotate motor 3 counterclockwise
     in5.value, in6.value = (True, False)
     ena2.duty_cycle = CCW_duty
@@ -159,7 +158,6 @@ def move_backward(speed=255):
     in3.value, in4.value = (False, True)
     enb.duty_cycle = CW_duty
     print("Rotating 2 CW at %f duty cycle" % (100 * CW_duty / max_int))
-    CW_duty = CW_duty - duty_step
     time.sleep(2)
 
 
@@ -175,7 +173,6 @@ def move_forward(speed=255):
     in3.value, in4.value = (True, False)
     enb.duty_cycle = CCW_duty
     print("Rotating 2 CCW at %f duty cycle" % (100 * CCW_duty / max_int))
-    CCW_duty = CCW_duty - duty_step
     time.sleep(2)
 
 
@@ -228,15 +225,21 @@ def rotation_test():
     time.sleep(2)
 
 def movement_test():
-    move_forward()
-    time.sleep(1)
     move_backward()
+    time.sleep(1)
+    move_forward()
     time.sleep(1)
     move_left()
     time.sleep(1)
     move_right()
     time.sleep(1)
-
+    
+def forward_backward():
+    move_backward()
+    time.sleep(1)
+    move_forward()
+    time.sleep(1)
+    
 def off():
     my_servo.angle = 110
     ena.duty_cycle = 0
@@ -290,6 +293,6 @@ while True:
         time.sleep(SAMPLE_INTERVAL)
 
         # WRITE CODE HERE FOR TEST
-        movement_test()
+        forward_backward()
         off()
         button_pressed = False  # Reset button pressed state
